@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculateur de Tarifs de Livraison</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #1c1c1c; /* Fond sombre */
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: #ffffff; /* Texte blanc */
+        }
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background-color: #2e2e2e; /* Couleur de fond du conteneur */
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+            text-align: center;
+        }
+        .logo {
+            width: 150px; /* Taille du logo */
+            margin-bottom: 20px;
+        }
+        h2 {
+            color: #2980b9; /* Bleu foncé pour le titre */
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+        label {
+            font-weight: bold;
+            margin-top: 15px;
+            color: #cccccc; /* Texte gris clair */
+            display: block;
+            text-align: left;
+        }
+        input, select {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin-top: 5px;
+            margin-bottom: 15px;
+            border: 1px solid #555555; /* Bordure plus foncée */
+            border-radius: 5px;
+            background-color: #3e3e3e; /* Fond sombre pour les champs */
+            color: #ffffff; /* Texte blanc */
+            box-sizing: border-box;
+            font-size: 16px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .button-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        button {
+            width: 48%;
+            padding: 12px;
+            margin-top: 10px;
+            margin-bottom: 15px;
+            border: none;
+            border-radius: 5px;
+            background-color: #f1c40f; /* Jaune pour les boutons */
+            color: #1c1c1c; /* Texte noir pour contraste */
+            font-size: 16px;
+            cursor: pointer;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            transition: background-color 0.3s, box-shadow 0.3s;
+        }
+        button:hover {
+            background-color: #d4ac0d; /* Jaune plus foncé pour le survol */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .result {
+            background-color: #2980b9; /* Fond bleu foncé pour le résultat */
+            padding: 20px;
+            border-radius: 5px;
+            border: 1px solid #21618c; /* Bordure plus foncée */
+            margin-top: 20px;
+            color: #ffffff; /* Texte blanc pour le résultat */
+            text-align: left;
+        }
+        .footer {
+            margin-top: 30px;
+            font-size: 12px;
+            color: #868e96;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT_JQyzD5uMfMVJXMGJzv2TKwpdL6krNulb-Q&s" alt="Logo" class="logo">
+        <h2>Calculateur de Tarifs de Livraison</h2>
+
+        <label for="depot">Dépôt de départ :</label>
+        <select id="depot">
+            <option value="8 rue Alfred Sauvy, 34670 Baillargues">Baillargues</option>
+            <option value="Zone euro 2000, Établissements Cambon, 30132 Caissargues">Caissargues</option>
+            <option value="87PG+4C Villeneuve-lès-Béziers">Béziers</option>
+            <option value="Quartier de l'agneau, RN, Établissements Cambon, 13127 Vitrolles">Vitrolles</option>
+        </select>
+        
+        <label for="distance">Distance en kilomètres :</label>
+        <input type="number" id="distance" placeholder="Entrez la distance en km">
+
+        <label for="palettes">Nombre de palettes :</label>
+        <select id="palettes">
+            <option value="3">3 palettes</option>
+            <option value="4">4 palettes</option>
+            <option value="5">5 palettes</option>
+            <option value="6">6 palettes</option>
+        </select>
+        
+        <div class="button-container">
+            <button onclick="ouvrirGoogleMaps()">Google Maps</button>
+            <button onclick="calculerTarif()">Calculer le Tarif</button>
+        </div>
+        
+        <div id="resultat" class="result"></div>
+        
+        <div class="footer">
+            © 2023 Cambon Enduits de Façade. Tous droits réservés.
+        </div>
+    </div>
+    
+    <script>
+        function calculerTarif() {
+            var depot = document.getElementById('depot').value;
+            var distance = parseFloat(document.getElementById('distance').value);
+            var palettes = parseInt(document.getElementById('palettes').value);
+            var supplement = 0;
+            var tarifMinimum = 80; // Tarif minimum fixé à 80 euros
+
+            if (!distance || distance <= 0) {
+                document.getElementById('resultat').innerText = "Veuillez entrer une distance valide.";
+                return;
+            }
+
+            // Définition des suppléments fixes
+            if (depot.includes("Béziers")) {
+                supplement = 50; // Supplément de 50 € pour Béziers
+            } else if (depot.includes("Vitrolles")) {
+                supplement = 70; // Supplément de 70 € pour Vitrolles
+            }
+
+            var coefficient = 0;
+
+            // Définition des coefficients en fonction de la distance et des palettes
+            if (distance <= 20) {
+                coefficient = palettes === 3 ? 4 : palettes === 4 ? 3 : palettes === 5 ? 2 : 0;
+            } else if (distance <= 40) {
+                coefficient = palettes === 3 ? 4 : palettes === 4 ? 4 : palettes === 5 ? 3 : 0;
+            } else if (distance <= 60) {
+                coefficient = palettes === 3 ? 4 : palettes === 4 ? 4 : palettes === 5 ? 3 : 1;
+            } else if (distance <= 80) {
+                coefficient = palettes === 3 ? 4 : palettes === 4 ? 4 : palettes === 5 ? 3 : 2;
+            } else if (distance <= 100) {
+                coefficient = palettes === 3 ? 4 : palettes === 4 ? 4 : palettes === 5 ? 3 : 2;
+            }
+
+            var coutTotal = coefficient * distance + supplement;
+            
+            // Appliquer le tarif minimum
+            if (coutTotal < tarifMinimum) {
+                coutTotal = tarifMinimum;
+            }
+
+            document.getElementById('resultat').innerHTML = `<strong>Distance :</strong> ${distance.toFixed(2)} km<br>
+                                                             <strong>Coût de livraison :</strong> ${coutTotal.toFixed(2)} € HT<br>
+                                                             <strong>Supplément :</strong> ${supplement} € HT`;
+        }
+
+        function ouvrirGoogleMaps() {
+            var depot = document.getElementById('depot').value;
+
+            if (!depot) {
+                alert("Veuillez sélectionner un dépôt de départ.");
+                return;
+            }
+
+            // Crée un lien direct vers Google Maps avec le dépôt
+            var url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(depot)}`;
+
+            // Ouvre le lien dans un nouvel onglet
+            window.open(url, '_blank');
+        }
+    </script>
+</body>
+</html>
+
